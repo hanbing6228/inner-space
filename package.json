@@ -9,7 +9,8 @@
     "ios": "npm run cap:sync && npx cap open ios",
     "ios:run": "npm run cap:sync && npx cap run ios",
     "assets": "npx capacitor-assets generate --ios",
-    "deploy:api": "bash scripts/deploy-api.sh"
+    "deploy:api": "bash scripts/deploy-api.sh",
+    "vercel-build": "node scripts/sync-www.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.0",
