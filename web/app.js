@@ -542,7 +542,16 @@ function checkRitual(i) {
 }
 
 // ── AI CALL ──
-async function callAI(sys, usr) {
+function aiErrHint(msg) {
+  if (/quota|429|额度/i.test(msg)) {
+    toast('⚠️ Gemini 免费额度已用完，已显示预设文案。请更新 API Key 后重试');
+  } else if (/timeout/i.test(msg)) {
+    toast('AI 响应超时，已显示预设文案');
+  } else if (/fetch|network|Failed/i.test(msg)) {
+    toast('网络连接失败，已显示预设文案');
+  }
+}
+async function callAIOnce(sys, usr) {
   const ctrl = new AbortController();
   const timer = setTimeout(function () { ctrl.abort(); }, 30000);
   try {
@@ -564,6 +573,24 @@ async function callAI(sys, usr) {
   } finally {
     clearTimeout(timer);
   }
+}
+async function callAI(sys, usr) {
+  var lastErr = 'unknown';
+  for (var attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await callAIOnce(sys, usr);
+    } catch (e) {
+      lastErr = e && e.message ? e.message : String(e);
+      if (attempt < 2 && /quota|429|timeout/i.test(lastErr)) {
+        await new Promise(function (r) { setTimeout(r, 2000 * (attempt + 1)); });
+        continue;
+      }
+      aiErrHint(lastErr);
+      throw e;
+    }
+  }
+  aiErrHint(lastErr);
+  throw new Error(lastErr);
 }
 
 // ── TYPEWRITER ──
