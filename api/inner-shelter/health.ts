@@ -12,6 +12,6 @@ export default function handler(_req: VercelRequest, res: VercelResponse) {
     ok: true,
     gemini: !!(key && key.trim()),
     openai: !!(openai && openai.trim()),
-    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash,gemini-2.5-flash,gemini-2.5-pro',
+    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash-lite,gemini-2.5-flash,gemini-2.0-flash',
   });
 }

@@ -2,8 +2,14 @@
 function isNativeApp() {
   return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
+var INNER_SHELTER_API_HOST = 'https://inner-shelter-ios.vercel.app';
 function apiBase() {
-  return window.INNER_SHELTER_API || '';
+  if (window.INNER_SHELTER_API) return String(window.INNER_SHELTER_API).replace(/\/$/, '');
+  if (typeof location !== 'undefined') {
+    var h = location.hostname;
+    if (h === 'inner-shelter-ios.vercel.app' || h === 'localhost' || h === '127.0.0.1') return '';
+  }
+  return isNativeApp() ? INNER_SHELTER_API_HOST : INNER_SHELTER_API_HOST;
 }
 
 // ── STATE ──
@@ -404,6 +410,10 @@ function enterApp() {
 
 // ── GENERATE LETTER ──
 async function generateLetter() {
+  const lb = document.getElementById('lbody');
+  if (!lb) return;
+  const prev = lb.textContent;
+  lb.textContent = '正在为你写今日肯定语……';
   try {
     const n = new Date();
     const dateStr = n.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
@@ -411,9 +421,11 @@ async function generateLetter() {
       '你是Jennifer的疗愈伴侣。写一封不超过100字的温暖肯定语。规则：用中文；冷静细腻，不说教，不鸡汤；先确认辛苦，再肯定今日的存在本身，语气像一个温暖的老朋友。不需要给动作建议。',
       '今天是' + dateStr + '，Jennifer完成了一天的工作和生活。请为她写今晚的温暖肯定语。'
     );
-    const lb = document.getElementById('lbody');
-    if (lb) lb.textContent = r;
-  } catch (e) { /* keep default */ }
+    lb.textContent = r;
+  } catch (e) {
+    lb.textContent = prev;
+    console.warn('[inner-shelter] AI letter failed:', e && e.message ? e.message : e);
+  }
 }
 
 // ── BLOOD GLUCOSE ──
@@ -532,7 +544,7 @@ function checkRitual(i) {
 // ── AI CALL ──
 async function callAI(sys, usr) {
   const ctrl = new AbortController();
-  const timer = setTimeout(function () { ctrl.abort(); }, 15000);
+  const timer = setTimeout(function () { ctrl.abort(); }, 30000);
   try {
     const res = await fetch(apiBase() + '/api/inner-shelter/chat', {
       method: 'POST',
@@ -540,10 +552,15 @@ async function callAI(sys, usr) {
       body: JSON.stringify({ system: sys, user: usr }),
       signal: ctrl.signal
     });
-    if (!res.ok) throw new Error('api error');
-    const d = await res.json();
-    if (!d.text) throw new Error('no text');
+    const d = await res.json().catch(function () { return {}; });
+    if (!res.ok) {
+      throw new Error(d.detail || d.error || ('HTTP ' + res.status));
+    }
+    if (!d.text) throw new Error(d.error || 'no text');
     return d.text;
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error('timeout');
+    throw e;
   } finally {
     clearTimeout(timer);
   }
