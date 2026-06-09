@@ -17,7 +17,7 @@ function getGoogleKey(): string | undefined {
 }
 
 async function chatWithGeminiREST(system: string, user: string, key: string): Promise<string> {
-  const models = (process.env.GEMINI_MODEL || 'gemini-2.0-flash,gemini-1.5-flash,gemini-2.5-flash')
+  const models = (process.env.GEMINI_MODEL || 'gemini-2.0-flash,gemini-2.5-flash,gemini-2.5-pro')
     .split(',')
     .map((m) => m.trim())
     .filter(Boolean);
