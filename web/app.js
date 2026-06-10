@@ -133,7 +133,7 @@ function setEn(lv, btn) {
 // ── FLASHBACK ──
 function openFB() {
   document.getElementById('fbo').classList.add('open');
-  startBreathGuide('sos', { bgOnly: true, syncIds: { num: 'bnum', ph: 'bph', lbl: 'blbl' } });
+  startBreathGuide('sos', { bgOnly: true, fbo: true, voice: true });
   resetWlk(); schedWlk();
 }
 function closeFB() {
@@ -142,14 +142,67 @@ function closeFB() {
   clearTimeout(wTmr);
 }
 
-// ── BREATH GUIDE · 渐变 + 震动 ──
-var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0 };
+// ── BREATH GUIDE · 曼陀罗 + 男声 + 震动 ──
+var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0, lastVoice: '' };
+var breathVoice = null;
 var BREATH_CFG = {
   sos:      { in: 4, hold: 0, out: 6, prep: true,  label: '安全着陆呼吸' },
   paced:    { in: 4, hold: 2, out: 6, prep: true,  label: '节奏呼吸', cycles: 6 },
   ground:   { in: 4, hold: 0, out: 4, prep: false, label: '接地呼吸' },
   exercise: { in: 3, hold: 0, out: 3, prep: false, label: '运动呼吸' }
 };
+var BREATH_VOICE = {
+  prep: '沉静下来。将注意力，放在呼吸上。',
+  in: '吸气。',
+  hold: '屏息。',
+  out: '呼气。',
+  done: '好样的。'
+};
+
+function pickBreathVoice() {
+  if (!window.speechSynthesis) return null;
+  var vs = speechSynthesis.getVoices();
+  var zh = vs.filter(function (v) { return v.lang && v.lang.indexOf('zh') === 0; });
+  var maleRe = /li-mu|limu|li mu|ting-tong|tingong|yunjian|yunxi|kang|han|male|男|bo|male/i;
+  for (var i = 0; i < zh.length; i++) {
+    if (maleRe.test(zh[i].name)) return zh[i];
+  }
+  return zh.find(function (v) { return v.lang === 'zh-CN'; }) || zh[0] || null;
+}
+if (window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = function () { breathVoice = pickBreathVoice(); };
+  breathVoice = pickBreathVoice();
+}
+
+function breathSpeak(text) {
+  if (!window.speechSynthesis || !text) return;
+  try {
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 0.78;
+    u.pitch = 0.72;
+    u.volume = 0.95;
+    if (breathVoice) u.voice = breathVoice;
+    else u.pitch = 0.65;
+    speechSynthesis.speak(u);
+  } catch (e) { /* ignore */ }
+}
+
+function stopBreathVoice() {
+  if (window.speechSynthesis) {
+    try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+  }
+  breathSess.lastVoice = '';
+}
+
+function speakBreathPhase(phase) {
+  if (!breathSess.opts || breathSess.opts.voice === false) return;
+  if (breathSess.lastVoice === phase) return;
+  breathSess.lastVoice = phase;
+  var line = BREATH_VOICE[phase];
+  if (line) breathSpeak(line);
+}
 
 function hapticPulse(kind) {
   try {
@@ -170,35 +223,8 @@ function hapticPulse(kind) {
 }
 
 function setBreathUI(phase) {
-  var hints = {
-    prep: ['准备', '沉静下来，将注意力放在呼吸上。'],
-    in: ['吸气', '深深吸气……'],
-    hold: ['屏息', '保持这一口气……'],
-    out: ['呼气', '缓缓呼出……']
-  };
-  var L = hints[phase] || ['', ''];
   document.body.classList.remove('breath-in', 'breath-out', 'breath-hold', 'breath-prep');
   if (phase) document.body.classList.add('breath-' + phase);
-
-  var o = breathSess.opts;
-  if (o && o.syncIds) {
-    var num = document.getElementById(o.syncIds.num);
-    var ph = document.getElementById(o.syncIds.ph);
-    var lbl = document.getElementById(o.syncIds.lbl);
-    if (num) num.textContent = (phase === 'prep') ? '·' : breathSess.count;
-    if (ph) ph.textContent = L[0];
-    if (lbl) lbl.textContent = L[1];
-  }
-
-  var showUi = !o || !o.bgOnly || o.fullscreen;
-  if (showUi) {
-    var bp = document.getElementById('baPhase');
-    var bc = document.getElementById('baCount');
-    var bh = document.getElementById('baHint');
-    if (bp) bp.textContent = L[0];
-    if (bc) bc.textContent = (phase === 'prep') ? '' : String(breathSess.count);
-    if (bh) bh.textContent = L[1];
-  }
 }
 
 function hapticForPhase(phase, count) {
@@ -213,10 +239,14 @@ function hapticForPhase(phase, count) {
   if (phase === 'out') hapticPulse('light');
 }
 
+function breathPhaseChange() {
+  setBreathUI(breathSess.phase);
+  speakBreathPhase(breathSess.phase);
+}
+
 function breathTick() {
   if (!breathSess.active) return;
   var cfg = breathSess.cfg;
-  setBreathUI(breathSess.phase);
   hapticForPhase(breathSess.phase, breathSess.count);
   breathSess.count--;
   if (breathSess.count > 0) return;
@@ -241,7 +271,7 @@ function breathTick() {
       return;
     }
   }
-  setBreathUI(breathSess.phase);
+  breathPhaseChange();
 }
 
 function startBreathGuide(mode, opts) {
@@ -260,6 +290,7 @@ function startBreathGuide(mode, opts) {
     aura.classList.add('on');
     aura.classList.toggle('full', !!opts.fullscreen);
     aura.classList.toggle('bg', !!opts.bgOnly && !opts.fullscreen);
+    aura.classList.toggle('fbo', !!opts.fbo);
   }
   document.body.classList.add('breath-on');
   if (mode === 'exercise') document.body.classList.add('pt-breath');
@@ -271,7 +302,11 @@ function startBreathGuide(mode, opts) {
     breathSess.phase = 'in';
     breathSess.count = cfg.in;
   }
-  setBreathUI(breathSess.phase);
+  breathSess.lastVoice = '';
+  breathPhaseChange();
+  if (opts.voice !== false && window.speechSynthesis && !breathVoice) {
+    breathVoice = pickBreathVoice();
+  }
   clearInterval(breathSess.timer);
   breathSess.timer = setInterval(breathTick, 1000);
 }
@@ -279,19 +314,26 @@ function startBreathGuide(mode, opts) {
 function stopBreathGuide(showToast) {
   breathSess.active = false;
   clearInterval(breathSess.timer);
+  stopBreathVoice();
   document.body.classList.remove('breath-on', 'breath-in', 'breath-out', 'breath-hold', 'breath-prep', 'pt-breath');
   var aura = document.getElementById('breathAura');
-  if (aura) aura.classList.remove('on', 'full', 'bg');
-  if (showToast) toast('🌬 呼吸练习结束 · 你已经做得很好');
+  if (aura) aura.classList.remove('on', 'full', 'bg', 'fbo');
+  if (showToast) toast('🌬 呼吸练习结束');
 }
 
 function finishBreathGuide() {
   hapticPulse('success');
+  if (breathSess.opts && breathSess.opts.voice !== false) {
+    breathSess.lastVoice = '';
+    breathSpeak(BREATH_VOICE.done);
+    setTimeout(function () { stopBreathGuide(true); }, 1800);
+    return;
+  }
   stopBreathGuide(true);
 }
 
 function startPacedBreath() {
-  startBreathGuide('paced', { fullscreen: true });
+  startBreathGuide('paced', { fullscreen: true, voice: true });
 }
 function resetWlk() {
   wIdx2 = 0;
@@ -402,7 +444,7 @@ function start541() {
   c.style.display = 'block';
   g541s = 0;
   g541Breath = true;
-  startBreathGuide('ground', { bgOnly: true });
+  startBreathGuide('ground', { bgOnly: true, voice: true });
   show541(t);
   setTimeout(() => document.getElementById('s-anchor').scrollTo({ top: c.offsetTop - 80, behavior: 'smooth' }), 100);
 }
@@ -442,7 +484,7 @@ function togglePT() {
   } else {
     ptRun = true;
     document.getElementById('ptplay').textContent = '⏸';
-    startBreathGuide('exercise', { bgOnly: true });
+    startBreathGuide('exercise', { bgOnly: true, voice: true });
     ptTmr = setInterval(() => {
       ptSec--;
       document.getElementById('pttn').textContent = String(ptSec).padStart(2, '0');

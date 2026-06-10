@@ -31,21 +31,24 @@
 <div class="amb"><div class="o o1"></div><div class="o o2"></div><div class="o o3"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- BREATH AURA · Apple Watch 风格呼吸渐变 + 花瓣 -->
+<!-- BREATH AURA · 曼陀罗呼吸（纯视觉 + 男声引导） -->
 <div id="breathAura" aria-hidden="true">
   <div class="ba-bg"></div>
   <div class="ba-core">
-    <div class="ba-flower" id="baFlower">
-      <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
-      <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
+    <div class="ba-mandala" id="baMandala">
+      <div class="ba-soft"></div>
+      <div class="ba-ring ba-r1">
+        <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
+        <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
+      </div>
+      <div class="ba-ring ba-r2">
+        <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
+        <span class="ba-p"></span><span class="ba-p"></span><span class="ba-p"></span>
+      </div>
+      <div class="ba-orb"></div>
     </div>
   </div>
-  <div class="ba-ui" id="baUi">
-    <button type="button" class="ba-end" onclick="stopBreathGuide(true)">结束练习</button>
-    <div class="ba-phase" id="baPhase">吸气</div>
-    <div class="ba-count" id="baCount">4</div>
-    <div class="ba-hint" id="baHint">沉静下来，将注意力放在呼吸上</div>
-  </div>
+  <button type="button" class="ba-end" onclick="stopBreathGuide(true)" aria-label="结束呼吸练习"></button>
 </div>
 
 <!-- FLASHBACK OVERLAY -->
@@ -61,10 +64,10 @@
     <div style="font-family:'DM Serif Display',serif;font-size:26px;line-height:1.25;color:var(--txt)">你现在是安全的。<br><span style="font-style:italic;color:var(--C)">这只是一段记忆。</span></div>
     <div style="margin-top:8px;font-family:'Noto Serif SC',serif;font-size:13px;color:var(--muted);line-height:1.8">它无法再伤害你。你已经是成年人了。</div>
   </div>
-  <div class="bstage">
-    <div class="bout"><div class="bbd"></div><div class="bctr"><div class="bnum" id="bnum">4</div><div class="bph" id="bph">吸气</div></div></div>
-    <div class="blbl" id="blbl">跟随光圈，平稳呼吸</div>
-    <div class="bsub">双手叠放胸口<br>感受心跳的节律，你在，你安全</div>
+  <div class="bstage bstage-voice" aria-hidden="true">
+    <div class="bout"><div class="bbd"></div><div class="bctr"><div class="bnum" id="bnum"></div><div class="bph" id="bph"></div></div></div>
+    <div class="blbl" id="blbl"></div>
+    <div class="bsub">双手叠放胸口 · 感受心跳 · 跟随呼吸图案</div>
   </div>
   <div class="slbl" style="margin-bottom:12px">皮特·沃克 · 闪回管理步骤</div>
   <div class="wlk" id="wlist">
