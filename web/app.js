@@ -15,7 +15,7 @@ function apiBase() {
 // ── STATE ──
 let pts = 180, cur = 's-home', hist = [], lclaimed = false;
 let ptAct = -1, ptTmr = null, ptSec = 0, ptRun = false, ptDone = 0;
-let bInt = null, bPh = 'in', bCt = 4, wIdx2 = 0, wTmr = null, g541s = 0;
+let wIdx2 = 0, wTmr = null, g541s = 0, g541Breath = false;
 let bglData = [];
 let bglCtxSelected = [];
 let walkTimerInt = null, walkSec = 600, walkRunning = false;
@@ -131,20 +131,167 @@ function setEn(lv, btn) {
 }
 
 // ── FLASHBACK ──
-function openFB() { document.getElementById('fbo').classList.add('open'); startB(); resetWlk(); schedWlk(); }
-function closeFB() { document.getElementById('fbo').classList.remove('open'); clearInterval(bInt); clearTimeout(wTmr); }
-function startB() {
-  bPh = 'in'; bCt = 4; rendB();
-  bInt = setInterval(() => {
-    bCt--;
-    if (bCt <= 0) { bPh = bPh === 'in' ? 'out' : 'in'; bCt = bPh === 'in' ? 4 : 6; }
-    rendB();
-  }, 1000);
+function openFB() {
+  document.getElementById('fbo').classList.add('open');
+  startBreathGuide('sos', { bgOnly: true, syncIds: { num: 'bnum', ph: 'bph', lbl: 'blbl' } });
+  resetWlk(); schedWlk();
 }
-function rendB() {
-  document.getElementById('bnum').textContent = bCt;
-  document.getElementById('bph').textContent = bPh === 'in' ? '吸气' : '呼气';
-  document.getElementById('blbl').textContent = bPh === 'in' ? '深深吸气……' : '缓缓呼出……';
+function closeFB() {
+  document.getElementById('fbo').classList.remove('open');
+  stopBreathGuide(false);
+  clearTimeout(wTmr);
+}
+
+// ── BREATH GUIDE · 渐变 + 震动 ──
+var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0 };
+var BREATH_CFG = {
+  sos:      { in: 4, hold: 0, out: 6, prep: true,  label: '安全着陆呼吸' },
+  paced:    { in: 4, hold: 2, out: 6, prep: true,  label: '节奏呼吸', cycles: 6 },
+  ground:   { in: 4, hold: 0, out: 4, prep: false, label: '接地呼吸' },
+  exercise: { in: 3, hold: 0, out: 3, prep: false, label: '运动呼吸' }
+};
+
+function hapticPulse(kind) {
+  try {
+    var cap = window.Capacitor && window.Capacitor.Plugins;
+    if (cap && cap.Haptics) {
+      if (kind === 'success') cap.Haptics.notification({ type: 'SUCCESS' }).catch(function () { });
+      else if (kind === 'heavy') cap.Haptics.impact({ style: 'HEAVY' }).catch(function () { });
+      else if (kind === 'medium') cap.Haptics.impact({ style: 'MEDIUM' }).catch(function () { });
+      else cap.Haptics.impact({ style: 'LIGHT' }).catch(function () { });
+      return;
+    }
+  } catch (e) { /* ignore */ }
+  if (!navigator.vibrate) return;
+  if (kind === 'success') navigator.vibrate([20, 40, 20]);
+  else if (kind === 'heavy') navigator.vibrate(28);
+  else if (kind === 'medium') navigator.vibrate(18);
+  else navigator.vibrate(10);
+}
+
+function setBreathUI(phase) {
+  var hints = {
+    prep: ['准备', '沉静下来，将注意力放在呼吸上。'],
+    in: ['吸气', '深深吸气……'],
+    hold: ['屏息', '保持这一口气……'],
+    out: ['呼气', '缓缓呼出……']
+  };
+  var L = hints[phase] || ['', ''];
+  document.body.classList.remove('breath-in', 'breath-out', 'breath-hold', 'breath-prep');
+  if (phase) document.body.classList.add('breath-' + phase);
+
+  var o = breathSess.opts;
+  if (o && o.syncIds) {
+    var num = document.getElementById(o.syncIds.num);
+    var ph = document.getElementById(o.syncIds.ph);
+    var lbl = document.getElementById(o.syncIds.lbl);
+    if (num) num.textContent = (phase === 'prep') ? '·' : breathSess.count;
+    if (ph) ph.textContent = L[0];
+    if (lbl) lbl.textContent = L[1];
+  }
+
+  var showUi = !o || !o.bgOnly || o.fullscreen;
+  if (showUi) {
+    var bp = document.getElementById('baPhase');
+    var bc = document.getElementById('baCount');
+    var bh = document.getElementById('baHint');
+    if (bp) bp.textContent = L[0];
+    if (bc) bc.textContent = (phase === 'prep') ? '' : String(breathSess.count);
+    if (bh) bh.textContent = L[1];
+  }
+}
+
+function hapticForPhase(phase, count) {
+  var cfg = breathSess.cfg;
+  if (!cfg) return;
+  if (phase === 'prep') { hapticPulse('soft'); return; }
+  if (phase === 'in') {
+    hapticPulse(count <= 2 ? 'medium' : 'light');
+    return;
+  }
+  if (phase === 'hold') { hapticPulse('light'); return; }
+  if (phase === 'out') hapticPulse('light');
+}
+
+function breathTick() {
+  if (!breathSess.active) return;
+  var cfg = breathSess.cfg;
+  setBreathUI(breathSess.phase);
+  hapticForPhase(breathSess.phase, breathSess.count);
+  breathSess.count--;
+  if (breathSess.count > 0) return;
+
+  if (breathSess.phase === 'prep') {
+    breathSess.phase = 'in';
+    breathSess.count = cfg.in;
+  } else if (breathSess.phase === 'in') {
+    breathSess.phase = cfg.hold ? 'hold' : 'out';
+    breathSess.count = cfg.hold || cfg.out;
+    if (breathSess.phase === 'out') hapticPulse('medium');
+  } else if (breathSess.phase === 'hold') {
+    breathSess.phase = 'out';
+    breathSess.count = cfg.out;
+    hapticPulse('medium');
+  } else {
+    breathSess.phase = 'in';
+    breathSess.count = cfg.in;
+    breathSess.cycle++;
+    if (breathSess.opts && breathSess.opts.fullscreen && cfg.cycles && breathSess.cycle >= cfg.cycles) {
+      finishBreathGuide();
+      return;
+    }
+  }
+  setBreathUI(breathSess.phase);
+}
+
+function startBreathGuide(mode, opts) {
+  opts = opts || {};
+  var cfg = BREATH_CFG[mode];
+  if (!cfg) return;
+  if (breathSess.active) stopBreathGuide(false);
+  breathSess.mode = mode;
+  breathSess.opts = opts;
+  breathSess.cfg = cfg;
+  breathSess.active = true;
+  breathSess.cycle = 0;
+
+  var aura = document.getElementById('breathAura');
+  if (aura) {
+    aura.classList.add('on');
+    aura.classList.toggle('full', !!opts.fullscreen);
+    aura.classList.toggle('bg', !!opts.bgOnly && !opts.fullscreen);
+  }
+  document.body.classList.add('breath-on');
+  if (mode === 'exercise') document.body.classList.add('pt-breath');
+
+  if (cfg.prep) {
+    breathSess.phase = 'prep';
+    breathSess.count = 2;
+  } else {
+    breathSess.phase = 'in';
+    breathSess.count = cfg.in;
+  }
+  setBreathUI(breathSess.phase);
+  clearInterval(breathSess.timer);
+  breathSess.timer = setInterval(breathTick, 1000);
+}
+
+function stopBreathGuide(showToast) {
+  breathSess.active = false;
+  clearInterval(breathSess.timer);
+  document.body.classList.remove('breath-on', 'breath-in', 'breath-out', 'breath-hold', 'breath-prep', 'pt-breath');
+  var aura = document.getElementById('breathAura');
+  if (aura) aura.classList.remove('on', 'full', 'bg');
+  if (showToast) toast('🌬 呼吸练习结束 · 你已经做得很好');
+}
+
+function finishBreathGuide() {
+  hapticPulse('success');
+  stopBreathGuide(true);
+}
+
+function startPacedBreath() {
+  startBreathGuide('paced', { fullscreen: true });
 }
 function resetWlk() {
   wIdx2 = 0;
@@ -254,12 +401,20 @@ function start541() {
   const t = document.getElementById('gtxt');
   c.style.display = 'block';
   g541s = 0;
+  g541Breath = true;
+  startBreathGuide('ground', { bgOnly: true });
   show541(t);
   setTimeout(() => document.getElementById('s-anchor').scrollTo({ top: c.offsetTop - 80, behavior: 'smooth' }), 100);
 }
 function show541(t) {
   typeIt(t, g541[g541s]);
-  if (g541s < g541.length - 1) { g541s++; setTimeout(() => show541(t), 9000); }
+  if (g541s < g541.length - 1) {
+    g541s++;
+    setTimeout(() => show541(t), 9000);
+  } else if (g541Breath) {
+    g541Breath = false;
+    setTimeout(function () { if (breathSess.mode === 'ground') stopBreathGuide(false); }, 9000);
+  }
 }
 
 // ── PT ──
@@ -283,18 +438,25 @@ function togglePT() {
   if (ptRun) {
     clearInterval(ptTmr); ptRun = false;
     document.getElementById('ptplay').textContent = '▶';
+    if (breathSess.mode === 'exercise') stopBreathGuide(false);
   } else {
     ptRun = true;
     document.getElementById('ptplay').textContent = '⏸';
+    startBreathGuide('exercise', { bgOnly: true });
     ptTmr = setInterval(() => {
       ptSec--;
       document.getElementById('pttn').textContent = String(ptSec).padStart(2, '0');
-      if (ptSec <= 0) { clearInterval(ptTmr); ptRun = false; completeEx(ptAct); }
+      if (ptSec <= 0) {
+        clearInterval(ptTmr); ptRun = false;
+        if (breathSess.mode === 'exercise') stopBreathGuide(false);
+        completeEx(ptAct);
+      }
     }, 1000);
   }
 }
 function resetPT() {
   clearInterval(ptTmr); ptRun = false;
+  if (breathSess.mode === 'exercise') stopBreathGuide(false);
   if (ptAct >= 0) {
     ptSec = exD[ptAct].s;
     document.getElementById('pttn').textContent = String(ptSec).padStart(2, '0');

@@ -367,3 +367,46 @@ body{font-family:'DM Sans','Noto Serif SC',-apple-system,BlinkMacSystemFont,'Pin
 @keyframes completePulse{0%{transform:scale(1)}30%{transform:scale(1.08)}60%{transform:scale(.97)}100%{transform:scale(1)}}
 .pulse{animation:completePulse .5s ease-out}
 
+/* ── BREATH AURA (Apple Watch style) ── */
+#breathAura{position:fixed;inset:0;z-index:280;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility .7s}
+#breathAura.on{opacity:1;visibility:visible}
+#breathAura.full{pointer-events:auto;z-index:320}
+#breathAura.full .ba-ui{opacity:1}
+#breathAura.bg .ba-ui{opacity:0;pointer-events:none}
+#breathAura.bg .ba-core{opacity:.55}
+.ba-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(72,210,220,.42) 0%,rgba(28,120,140,.28) 28%,rgba(12,28,38,.88) 58%,rgba(8,10,16,.98) 100%);transform:scale(1);transition:transform 4s cubic-bezier(.45,0,.2,1),background 4s cubic-bezier(.45,0,.2,1),filter 4s ease}
+body.breath-in .ba-bg{transform:scale(1.12);background:radial-gradient(circle at 50% 40%,rgba(90,230,235,.55) 0%,rgba(40,170,190,.35) 30%,rgba(16,50,60,.82) 55%,rgba(8,10,16,.96) 100%);filter:saturate(1.15)}
+body.breath-hold .ba-bg{transform:scale(1.1);background:radial-gradient(circle at 50% 40%,rgba(70,200,210,.48) 0%,rgba(35,130,150,.32) 32%,rgba(12,30,38,.85) 58%,rgba(8,10,16,.97) 100%)}
+body.breath-out .ba-bg{transform:scale(.9);background:radial-gradient(circle at 50% 44%,rgba(50,140,160,.22) 0%,rgba(30,80,100,.18) 26%,rgba(14,22,32,.9) 56%,rgba(6,8,14,.99) 100%);filter:saturate(.85) brightness(.88)}
+body.breath-prep .ba-bg{transform:scale(.96);background:radial-gradient(circle at 50% 42%,rgba(60,180,195,.25) 0%,rgba(20,60,72,.2) 35%,rgba(8,10,16,.96) 100%)}
+.ba-core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.ba-flower{position:relative;width:min(72vw,280px);height:min(72vw,280px);transform:scale(1);transition:transform 4s cubic-bezier(.45,0,.2,1),opacity .6s}
+body.breath-in .ba-flower{transform:scale(1.18)}
+body.breath-hold .ba-flower{transform:scale(1.14)}
+body.breath-out .ba-flower{transform:scale(.82);opacity:.75}
+.ba-p{position:absolute;left:50%;top:50%;width:38%;height:38%;margin:-19% 0 0 -19%;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(130,240,245,.75),rgba(60,190,205,.45) 55%,rgba(30,120,140,.15) 100%);mix-blend-mode:screen;opacity:.82;transition:transform 4s cubic-bezier(.45,0,.2,1),opacity 4s ease}
+.ba-p:nth-child(1){transform:translate(0,-28%)}
+.ba-p:nth-child(2){transform:rotate(51.4deg) translate(0,-28%)}
+.ba-p:nth-child(3){transform:rotate(102.8deg) translate(0,-28%)}
+.ba-p:nth-child(4){transform:rotate(154.3deg) translate(0,-28%)}
+.ba-p:nth-child(5){transform:rotate(205.7deg) translate(0,-28%)}
+.ba-p:nth-child(6){transform:rotate(257.1deg) translate(0,-28%)}
+.ba-p:nth-child(7){transform:rotate(308.5deg) translate(0,-28%)}
+body.breath-in .ba-p{opacity:.95}
+body.breath-out .ba-p{opacity:.45}
+.ba-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 28px calc(48px + var(--safe));text-align:center;opacity:0;transition:opacity .5s}
+.ba-end{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:20px;font-size:12px;color:var(--muted);cursor:pointer;padding:8px 16px;border:1px solid var(--bdr);border-radius:20px;background:rgba(20,23,32,.72);backdrop-filter:blur(12px);font-family:inherit}
+.ba-phase{font-family:'DM Serif Display',serif;font-size:clamp(28px,7vw,36px);color:#a8eef5;margin-bottom:6px;letter-spacing:.5px}
+.ba-count{font-size:clamp(52px,14vw,72px);font-weight:300;color:#d4f7fb;line-height:1;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.ba-hint{font-family:'Noto Serif SC',serif;font-size:14px;color:rgba(232,226,217,.72);line-height:1.75;max-width:320px}
+.fbo.open.breath-on{background:rgba(6,10,14,.78)}
+body.breath-on .bout{animation:none;transition:transform 4s cubic-bezier(.45,0,.2,1)}
+body.breath-in .bout{transform:scale(1.12)}
+body.breath-out .bout{transform:scale(.88)}
+body.breath-hold .bout{transform:scale(1.06)}
+body.breath-on .bout::before,body.breath-on .bout::after,body.breath-on .bbd{animation:none}
+body.breath-in .bout::after{opacity:1;background:radial-gradient(circle,rgba(126,220,230,.28) 0%,transparent 70%)}
+body.breath-out .bout::after{opacity:.35}
+body.pt-breath #s-pt .pth{position:relative;z-index:2}
+body.pt-breath #s-pt::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 30%,rgba(168,155,196,.12),transparent 65%);opacity:.8}
+
