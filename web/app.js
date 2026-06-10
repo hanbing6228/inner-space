@@ -143,7 +143,7 @@ function closeFB() {
 }
 
 // ── BREATH GUIDE · 曼陀罗 + 男声 + 震动 ──
-var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0, lastVoice: '' };
+var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0, lastVoice: '', currentAudio: null };
 var breathVoice = null;
 
 function pickBreathVoice() {
@@ -174,6 +174,78 @@ var BREATH_VOICE = {
   out: ['呼气', '缓缓呼出'],
   done: ['好样的', '你已经做得很好']
 };
+var BREATH_AUDIO = {
+  prep: ['prep_0', 'prep_1'],
+  in: ['in_0', 'in_1'],
+  hold: ['hold_0', 'hold_1'],
+  out: ['out_0', 'out_1'],
+  done: ['done_0', 'done_1'],
+  sos: ['sos_0', 'sos_1', 'sos_2']
+};
+var breathAudioPool = {};
+var breathAudioQueue = null;
+var breathAudioOk = true;
+
+function breathAudioSrc(id) {
+  return 'audio/breath/' + id + '.mp3';
+}
+
+function preloadBreathAudio() {
+  var ids = [];
+  Object.keys(BREATH_AUDIO).forEach(function (k) {
+    BREATH_AUDIO[k].forEach(function (id) { ids.push(id); });
+  });
+  ids.forEach(function (id) {
+    if (breathAudioPool[id]) return;
+    var a = new Audio(breathAudioSrc(id));
+    a.preload = 'auto';
+    breathAudioPool[id] = a;
+  });
+}
+
+function playBreathClip(id) {
+  return new Promise(function (resolve, reject) {
+    if (!breathAudioPool[id]) {
+      breathAudioPool[id] = new Audio(breathAudioSrc(id));
+      breathAudioPool[id].preload = 'auto';
+    }
+    var audio = breathAudioPool[id];
+    breathSess.currentAudio = audio;
+    audio.volume = 0.93;
+    audio.currentTime = 0;
+    function cleanup() {
+      audio.removeEventListener('ended', onEnd);
+      audio.removeEventListener('error', onErr);
+    }
+    function onEnd() { cleanup(); resolve(); }
+    function onErr() { cleanup(); reject(new Error('clip')); }
+    audio.addEventListener('ended', onEnd);
+    audio.addEventListener('error', onErr);
+    var p = audio.play();
+    if (p && p.catch) p.catch(reject);
+  });
+}
+
+function breathSpeakClips(ids) {
+  if (!ids || !ids.length) return;
+  stopBreathVoice(false);
+  var queue = { cancelled: false };
+  breathAudioQueue = queue;
+  var i = 0;
+  function next() {
+    if (queue.cancelled || i >= ids.length) return;
+    playBreathClip(ids[i]).then(function () {
+      if (queue.cancelled) return;
+      i++;
+      if (i < ids.length) setTimeout(next, 1100);
+    }).catch(function () {
+      breathAudioOk = false;
+      var lines = getBreathVoiceLines(breathSess.phase);
+      if (lines) breathSpeakParts(lines);
+    });
+  }
+  next();
+}
 
 function configureBreathUtterance(u) {
   u.lang = 'zh-CN';
@@ -212,11 +284,22 @@ function breathSpeak(text) {
   else breathSpeakParts([text]);
 }
 
-function stopBreathVoice() {
+function stopBreathVoice(clearPhase) {
+  if (breathAudioQueue) {
+    breathAudioQueue.cancelled = true;
+    breathAudioQueue = null;
+  }
+  if (breathSess.currentAudio) {
+    try {
+      breathSess.currentAudio.pause();
+      breathSess.currentAudio.currentTime = 0;
+    } catch (e) { /* ignore */ }
+    breathSess.currentAudio = null;
+  }
   if (window.speechSynthesis) {
     try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
   }
-  breathSess.lastVoice = '';
+  if (clearPhase !== false) breathSess.lastVoice = '';
 }
 
 function getBreathVoiceLines(phase) {
@@ -229,12 +312,27 @@ function getBreathVoiceLines(phase) {
   return lines;
 }
 
+function getBreathAudioClips(phase) {
+  var clips = (BREATH_AUDIO[phase] || []).slice();
+  if (breathSess.mode === 'sos' && phase === 'prep') {
+    clips = clips.concat(BREATH_AUDIO.sos);
+  }
+  return clips;
+}
+
 function speakBreathPhase(phase) {
   if (!breathSess.opts || breathSess.opts.voice === false) return;
   if (breathSess.lastVoice === phase) return;
   breathSess.lastVoice = phase;
+  if (breathAudioOk) {
+    var clips = getBreathAudioClips(phase);
+    if (clips.length) {
+      breathSpeakClips(clips);
+      return;
+    }
+  }
   var lines = getBreathVoiceLines(phase);
-  if (lines) breathSpeak(lines);
+  if (lines) breathSpeakParts(lines);
 }
 
 function hapticPulse(kind) {
@@ -336,10 +434,8 @@ function startBreathGuide(mode, opts) {
     breathSess.count = cfg.in;
   }
   breathSess.lastVoice = '';
+  preloadBreathAudio();
   breathPhaseChange();
-  if (opts.voice !== false && window.speechSynthesis && !breathVoice) {
-    breathVoice = pickBreathVoice();
-  }
   clearInterval(breathSess.timer);
   breathSess.timer = setInterval(breathTick, 1000);
 }
@@ -358,8 +454,9 @@ function finishBreathGuide() {
   hapticPulse('success');
   if (breathSess.opts && breathSess.opts.voice !== false) {
     breathSess.lastVoice = '';
-    breathSpeak(BREATH_VOICE.done);
-    setTimeout(function () { stopBreathGuide(true); }, 4500);
+    if (breathAudioOk) breathSpeakClips(BREATH_AUDIO.done);
+    else breathSpeakParts(BREATH_VOICE.done);
+    setTimeout(function () { stopBreathGuide(true); }, 6500);
     return;
   }
   stopBreathGuide(true);

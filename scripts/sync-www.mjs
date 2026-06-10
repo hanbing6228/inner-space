@@ -7,6 +7,7 @@ const src = existsSync(join(root, 'web'))
   ? join(root, 'web')
   : join(root, '..', 'public', 'inner-shelter');
 const files = ['index.html', 'styles.css', 'app.js', 'config.js', 'manifest.json', 'sw.js', 'icon.svg', 'privacy.html'];
+const audioSrc = join(src, 'audio', 'breath');
 
 function readApiUrl(filePath) {
   const lines = readFileSync(filePath, 'utf8').split('\n');
@@ -39,6 +40,9 @@ for (const destName of ['www', 'public']) {
     } else {
       cpSync(join(src, file), join(dest, file));
     }
+  }
+  if (existsSync(audioSrc)) {
+    cpSync(audioSrc, join(dest, 'audio', 'breath'), { recursive: true });
   }
 }
 

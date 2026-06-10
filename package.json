@@ -10,7 +10,8 @@
     "ios:run": "npm run cap:sync && npx cap run ios",
     "assets": "npx capacitor-assets generate --ios",
     "deploy:api": "bash scripts/deploy-api.sh",
-    "vercel-build": "node scripts/sync-www.mjs"
+    "vercel-build": "node scripts/sync-www.mjs",
+    "generate:breath-audio": "bash scripts/generate-breath-audio.sh"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.0",
