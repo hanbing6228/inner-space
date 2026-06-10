@@ -1,4 +1,4 @@
-const CACHE = 'inner-shelter-v6';
+const CACHE = 'inner-shelter-v7';
 const ASSETS = ['./index.html', './styles.css', './app.js', './config.js', './manifest.json', './icon.svg'];
 
 function fetchTimeout(req, ms) {

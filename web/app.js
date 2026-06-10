@@ -145,25 +145,12 @@ function closeFB() {
 // ── BREATH GUIDE · 曼陀罗 + 男声 + 震动 ──
 var breathSess = { active: false, timer: null, phase: 'in', count: 0, mode: null, opts: null, cfg: null, cycle: 0, lastVoice: '' };
 var breathVoice = null;
-var BREATH_CFG = {
-  sos:      { in: 4, hold: 0, out: 6, prep: true,  label: '安全着陆呼吸' },
-  paced:    { in: 4, hold: 2, out: 6, prep: true,  label: '节奏呼吸', cycles: 6 },
-  ground:   { in: 4, hold: 0, out: 4, prep: false, label: '接地呼吸' },
-  exercise: { in: 3, hold: 0, out: 3, prep: false, label: '运动呼吸' }
-};
-var BREATH_VOICE = {
-  prep: '沉静下来。将注意力，放在呼吸上。',
-  in: '吸气。',
-  hold: '屏息。',
-  out: '呼气。',
-  done: '好样的。'
-};
 
 function pickBreathVoice() {
   if (!window.speechSynthesis) return null;
   var vs = speechSynthesis.getVoices();
   var zh = vs.filter(function (v) { return v.lang && v.lang.indexOf('zh') === 0; });
-  var maleRe = /li-mu|limu|li mu|ting-tong|tingong|yunjian|yunxi|kang|han|male|男|bo|male/i;
+  var maleRe = /li-mu|limu|li mu|ting-tong|tingong|yunjian|yunxi|yunjie|kang|han|male|男|xiang|bo/i;
   for (var i = 0; i < zh.length; i++) {
     if (maleRe.test(zh[i].name)) return zh[i];
   }
@@ -174,19 +161,55 @@ if (window.speechSynthesis) {
   breathVoice = pickBreathVoice();
 }
 
-function breathSpeak(text) {
-  if (!window.speechSynthesis || !text) return;
+var BREATH_CFG = {
+  sos:      { in: 4, hold: 0, out: 6, prep: true,  label: '安全着陆呼吸' },
+  paced:    { in: 4, hold: 2, out: 6, prep: true,  label: '节奏呼吸', cycles: 6 },
+  ground:   { in: 4, hold: 0, out: 4, prep: false, label: '接地呼吸' },
+  exercise: { in: 3, hold: 0, out: 3, prep: false, label: '运动呼吸' }
+};
+var BREATH_VOICE = {
+  prep: ['沉静下来', '将注意力放在呼吸上'],
+  in: ['吸气', '深深吸气'],
+  hold: ['屏息', '保持这一口气'],
+  out: ['呼气', '缓缓呼出'],
+  done: ['好样的', '你已经做得很好']
+};
+
+function configureBreathUtterance(u) {
+  u.lang = 'zh-CN';
+  u.rate = 0.42;
+  u.pitch = 0.38;
+  u.volume = 0.78;
+  if (breathVoice) {
+    u.voice = breathVoice;
+  } else {
+    u.pitch = 0.32;
+  }
+}
+
+function breathSpeakParts(parts) {
+  if (!window.speechSynthesis || !parts || !parts.length) return;
   try {
     speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-CN';
-    u.rate = 0.78;
-    u.pitch = 0.72;
-    u.volume = 0.95;
-    if (breathVoice) u.voice = breathVoice;
-    else u.pitch = 0.65;
-    speechSynthesis.speak(u);
+    var i = 0;
+    function sayNext() {
+      if (i >= parts.length) return;
+      var u = new SpeechSynthesisUtterance(parts[i]);
+      configureBreathUtterance(u);
+      u.onend = function () {
+        i++;
+        if (i < parts.length) setTimeout(sayNext, 1100);
+      };
+      speechSynthesis.speak(u);
+    }
+    sayNext();
   } catch (e) { /* ignore */ }
+}
+
+function breathSpeak(text) {
+  if (!text) return;
+  if (Array.isArray(text)) breathSpeakParts(text);
+  else breathSpeakParts([text]);
 }
 
 function stopBreathVoice() {
@@ -196,12 +219,22 @@ function stopBreathVoice() {
   breathSess.lastVoice = '';
 }
 
+function getBreathVoiceLines(phase) {
+  var lines = BREATH_VOICE[phase];
+  if (!lines) return null;
+  lines = lines.slice();
+  if (breathSess.mode === 'sos' && phase === 'prep') {
+    lines.push('双手叠放胸口', '感受心跳的节律', '你在，你安全');
+  }
+  return lines;
+}
+
 function speakBreathPhase(phase) {
   if (!breathSess.opts || breathSess.opts.voice === false) return;
   if (breathSess.lastVoice === phase) return;
   breathSess.lastVoice = phase;
-  var line = BREATH_VOICE[phase];
-  if (line) breathSpeak(line);
+  var lines = getBreathVoiceLines(phase);
+  if (lines) breathSpeak(lines);
 }
 
 function hapticPulse(kind) {
@@ -326,7 +359,7 @@ function finishBreathGuide() {
   if (breathSess.opts && breathSess.opts.voice !== false) {
     breathSess.lastVoice = '';
     breathSpeak(BREATH_VOICE.done);
-    setTimeout(function () { stopBreathGuide(true); }, 1800);
+    setTimeout(function () { stopBreathGuide(true); }, 4500);
     return;
   }
   stopBreathGuide(true);
