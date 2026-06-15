@@ -991,7 +991,10 @@ function toggleTheme() {
 }
 function initTheme() {
   var t = 'day';
-  try { t = localStorage.getItem('is_theme') || 'day'; } catch (e) { }
+  try {
+    t = localStorage.getItem('is_theme') || 'day';
+    if (t !== 'day' && t !== 'night') t = 'day';
+  } catch (e) { }
   applyTheme(t);
 }
 
