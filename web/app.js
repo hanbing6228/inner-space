@@ -104,6 +104,7 @@ function goTo(id) {
   nx.classList.add('on'); hist.push(cur); cur = id; nx.scrollTop = 0;
   document.querySelectorAll('.ti').forEach(t => t.classList.remove('on'));
   if (tabM[id]) document.getElementById(tabM[id])?.classList.add('on');
+  document.body.classList.toggle('on-healer', id === 's-healer');
 }
 function goBack() { const p = hist.pop(); if (p) goTo(p); else goTo('s-home'); }
 
@@ -717,7 +718,9 @@ async function showLetter() {
 function setW(theme, btn) {
   document.querySelectorAll('.wb').forEach(b => b.classList.remove('on'));
   btn && btn.classList.add('on');
+  const wasNight = document.body.classList.contains('night');
   document.body.className = '';
+  if (wasNight) document.body.classList.add('night');
   if (theme === 'neon') document.body.classList.add('wn');
   else if (theme === 'forest') document.body.classList.add('wf');
   else if (theme === 'dusk') document.body.classList.add('wd');
@@ -801,7 +804,7 @@ function logBGL() {
 function addBGLLogItem(val, ctx, timeStr) {
   const log = document.getElementById('bglLog');
   const color = val < 140 ? 'var(--G)' : val < 160 ? 'var(--W)' : 'var(--R)';
-  const bdrColor = val < 140 ? 'rgba(139,196,160,.2)' : val < 160 ? 'rgba(212,149,106,.2)' : 'rgba(196,122,122,.2)';
+  const bdrColor = val < 140 ? 'rgba(79,156,116,.25)' : val < 160 ? 'rgba(59,127,223,.25)' : 'rgba(204,107,107,.25)';
   const div = document.createElement('div');
   div.style.cssText = 'background:var(--surf);border:1px solid ' + bdrColor + ';border-radius:var(--rs);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;animation:fu .3s ease-out';
   const left = document.createElement('div');
@@ -960,7 +963,109 @@ if (!isNativeApp() && 'serviceWorker' in navigator) {
 if (isNativeApp() && window.Capacitor.Plugins) {
   var sb = window.Capacitor.Plugins.StatusBar;
   if (sb) {
-    sb.setStyle({ style: 'DARK' }).catch(function () { });
-    sb.setBackgroundColor({ color: '#0d0f14' }).catch(function () { });
+    sb.setStyle({ style: 'LIGHT' }).catch(function () { });
+    sb.setBackgroundColor({ color: '#e9f1fb' }).catch(function () { });
   }
 }
+
+// ════════ THEME (day / night) ════════
+function applyTheme(t) {
+  var night = t === 'night';
+  document.body.classList.toggle('night', night);
+  document.querySelectorAll('.theme-ico').forEach(function (e) { e.textContent = night ? '☀️' : '🌙'; });
+  var tg = document.getElementById('nightTgl');
+  if (tg) tg.classList.toggle('on', night);
+  var sb2 = (isNativeApp() && window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.StatusBar : null;
+  if (sb2) {
+    sb2.setStyle({ style: night ? 'DARK' : 'LIGHT' }).catch(function () { });
+    sb2.setBackgroundColor({ color: night ? '#0e1726' : '#e9f1fb' }).catch(function () { });
+  }
+  var mt = document.querySelector('meta[name="theme-color"]');
+  if (mt) mt.setAttribute('content', night ? '#0e1726' : '#e9f1fb');
+  try { localStorage.setItem('is_theme', t); } catch (e) { }
+}
+function toggleTheme() {
+  var next = document.body.classList.contains('night') ? 'day' : 'night';
+  applyTheme(next);
+  toast(next === 'night' ? '🌙 已切换到夜间模式 · 让光线柔和下来' : '☀️ 已切换到日间模式');
+}
+function initTheme() {
+  var t = 'day';
+  try { t = localStorage.getItem('is_theme') || 'day'; } catch (e) { }
+  applyTheme(t);
+}
+
+// ════════ AI 疗愈师 · chat ════════
+var HEALER_SYS = '你是 Inner Shelter（内在家园）的 AI 疗愈师，专为复杂性创伤（C-CPTSD）幸存者设计。'
+  + '你温柔、稳定、不评判，像一个安全的成年人。语气口语化、简短（2-4 句），用中文。'
+  + '原则：先共情和确认感受，再轻轻提供一个可选的、低门槛的身体或认知微动作；不诊断、不说教、不催促、不要求对方"好起来"。'
+  + '可以引用 IFS（保护者/清醒自我）、接地练习、节奏呼吸等思路，但要自然，不堆术语。允许对方碎掉，也允许慢慢复原。';
+var hzSeeded = false;
+var hzBusy = false;
+var HZ_FALLBACK = {
+  tired: ['听起来你已经撑了很久了。累，本身就是身体在替你说话——它需要被听见，而不是被解决。\n此刻可以试试：把肩膀往耳朵方向耸起 3 秒，再缓缓放下。只做这一下就够了。'],
+  critic: ['那个严厉的声音其实是一个很努力的保护者，它以为这样能让你安全。\n试着在心里对它说一句："谢谢你想保护我，但现在我可以慢一点。" 不需要赶走它，先认识它。'],
+  sleep: ['脑子停不下来的时候，问题往往不在"想太多"，而是神经系统还没收到"安全"的信号。\n试试 4-2-6 呼吸：吸气 4 秒、屏 2 秒、呼气 6 秒，重复几轮。把注意力放在更长的那口呼气上。'],
+  numb: ['麻木不是你坏掉了，是系统在过载时按下的保护开关。你现在是安全的。\n找一样此刻能摸到的东西，说出它的温度和质地——让身体先回到房间里，慢慢来。'],
+  def: ['我接住了。你愿意把它说出来，已经很不容易了。\n你不需要立刻想清楚，也不需要表现得没事。此刻只要允许这个感受存在就好——我在这儿陪着你。']
+};
+function hzPick(text) {
+  var t = (text || '');
+  if (/累|疲|没力|撑不|耗尽/.test(t)) return HZ_FALLBACK.tired[0];
+  if (/批判|批评|否定|失败|不够|应该|必须|讨厌自己|没用/.test(t)) return HZ_FALLBACK.critic[0];
+  if (/睡|失眠|停不下|反刍|想太多|脑子/.test(t)) return HZ_FALLBACK.sleep[0];
+  if (/麻木|解离|不真实|空|抽离|没感觉/.test(t)) return HZ_FALLBACK.numb[0];
+  return HZ_FALLBACK.def[0];
+}
+function hzScroll() { var w = document.getElementById('hzMsgs'); if (w) w.scrollTop = w.scrollHeight; }
+function hzAdd(who, text) {
+  var w = document.getElementById('hzMsgs');
+  var m = document.createElement('div');
+  m.className = 'hzmsg ' + who;
+  w.appendChild(m);
+  if (who === 'ai') { typeIt(m, text, 16); var iv = setInterval(hzScroll, 60); setTimeout(function () { clearInterval(iv); }, text.length * 16 + 400); }
+  else { m.textContent = text; }
+  hzScroll();
+  return m;
+}
+function hzTyping() {
+  var w = document.getElementById('hzMsgs');
+  var m = document.createElement('div');
+  m.className = 'hzmsg ai typing';
+  m.innerHTML = '<span class="dots"><span></span><span></span><span></span></span>';
+  w.appendChild(m); hzScroll();
+  return m;
+}
+async function sendHealer(preset) {
+  if (hzBusy) return;
+  var inp = document.getElementById('hzInput');
+  var text = preset || (inp ? inp.value.trim() : '');
+  if (!text) return;
+  if (!preset && inp) { inp.value = ''; hzGrow(inp); }
+  hzAdd('me', text);
+  hzBusy = true;
+  var typing = hzTyping();
+  var done = function (r) { if (typing) typing.remove(); hzAdd('ai', r); hzBusy = false; };
+  try {
+    var r = await callAI(HEALER_SYS, text);
+    done((r && String(r).trim()) ? r : hzPick(text));
+  } catch (e) {
+    done(hzPick(text));
+  }
+}
+function openHealer() {
+  goTo('s-healer');
+  if (!hzSeeded) {
+    hzSeeded = true;
+    setTimeout(function () {
+      hzAdd('ai', '我在这里。此刻你不需要表现得很好，也不需要把话说清楚。\n想从哪里开始都可以——今天的身体、脑子里的那些声音，或者只是此刻的感觉。');
+    }, 320);
+  }
+  setTimeout(function () { var i = document.getElementById('hzInput'); if (i) i.focus(); }, 420);
+}
+function hzGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 104) + 'px'; }
+function hzKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendHealer(); }
+}
+
+initTheme();

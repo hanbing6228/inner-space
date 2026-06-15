@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0d0f14">
+<meta name="theme-color" content="#e9f1fb">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="内在家园">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -25,7 +25,7 @@
   <div class="onboard-sub">这里是你的神经友好空间。<br>没有打卡，没有催促，没有评判。<br>允许你碎掉，也允许你慢慢复原。</div>
   <button class="onboard-btn" onclick="enterApp()">进入家园 →</button>
   <div class="onboard-skip" onclick="enterApp()">直接开始</div>
-  <div style="margin-top:20px;font-size:11px;color:rgba(232,226,217,.25);letter-spacing:.5px">轻触按钮进入 · 不是加载中</div>
+  <div style="margin-top:20px;font-size:11px;color:rgba(34,52,79,.42);letter-spacing:.5px">轻触按钮进入 · 不是加载中</div>
 </div>
 
 <div class="amb"><div class="o o1"></div><div class="o o2"></div><div class="o o3"></div></div>
@@ -104,7 +104,7 @@
     <span class="stime" id="t0">21:03</span>
     <div style="display:flex;align-items:center;gap:10px">
       <div class="ptpill" onclick="goTo('s-shop')">✨ <span class="pd">180</span> pts</div>
-      <div style="display:flex;gap:5px"><span style="font-size:11px;opacity:.5">📶</span><span style="font-size:11px;opacity:.5">🔋</span></div>
+      <div class="themetgl theme-ico" onclick="toggleTheme()" title="切换日间 / 夜间">🌙</div>
     </div>
   </div>
   <div class="hero">
@@ -323,6 +323,11 @@
     <div class="wb" id="wdu" onclick="setW('dusk',this)"><div class="wi">🌅</div><div class="wl">黄昏</div></div>
   </div>
   <div style="height:8px"></div>
+  <div class="slbl">外观</div>
+  <div class="sgrp">
+    <div class="srow" onclick="toggleTheme()"><div class="srl"><div class="sico theme-ico">🌙</div><div class="slb">夜间模式</div></div><div class="tgl" id="nightTgl"></div></div>
+  </div>
+  <div style="height:8px"></div>
   <div class="slbl">提醒设置</div>
   <div class="sgrp">
     <div class="srow"><div class="srl"><div class="sico">⏰</div><div class="slb">每日简报提醒</div></div><div style="display:flex;align-items:center;gap:10px"><span class="sv">21:00</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div></div>
@@ -465,6 +470,29 @@
 
   <div class="sp"></div>
 </div>
+
+<!-- AI 疗愈师 -->
+<div class="sc" id="s-healer">
+  <div class="hdr">
+    <div class="back" onclick="goBack()">← 返回</div>
+    <div class="htitle it">AI 疗愈师</div>
+    <div class="hsub">此刻有人在听 · 你说什么都可以，不需要说得完整</div>
+  </div>
+  <div class="hzmsgs" id="hzMsgs"></div>
+  <div class="hzchips">
+    <div class="hzchip" onclick="sendHealer('我今天很累，但说不出为什么。')">🌫️ 我今天很累</div>
+    <div class="hzchip" onclick="sendHealer('我又开始严厉地批判自己了。')">🪞 又在自我批判</div>
+    <div class="hzchip" onclick="sendHealer('我脑子停不下来，睡不着。')">🌙 睡不着</div>
+    <div class="hzchip" onclick="sendHealer('我现在有点不真实、麻木、解离的感觉。')">💭 感觉麻木</div>
+  </div>
+  <div class="hzbar">
+    <textarea id="hzInput" rows="1" placeholder="把此刻的感受放在这里……" oninput="hzGrow(this)" onkeydown="hzKey(event)"></textarea>
+    <button class="hzsend" onclick="sendHealer()" aria-label="发送">➤</button>
+  </div>
+</div>
+
+<!-- AI 疗愈师 · 浮动入口 -->
+<button class="fab" id="healerFab" onclick="openHealer()"><span class="fabdot"></span>AI 疗愈师</button>
 
 <!-- TAB BAR -->
 <div class="tabs">
