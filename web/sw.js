@@ -1,4 +1,4 @@
-const CACHE = 'inner-shelter-v9';
+const CACHE = 'inner-shelter-v10';
 const ASSETS = ['./index.html', './styles.css', './app.js', './config.js', './manifest.json', './icon.svg'];
 const BREATH_AUDIO = [
   './audio/breath/prep_0.mp3', './audio/breath/prep_1.mp3',
