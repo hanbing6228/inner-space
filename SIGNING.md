@@ -24,7 +24,7 @@
 
 1. 打开工程：
    ```bash
-   cd inner-shelter-ios
+   cd inner-space
    npm run ios
    ```
 2. 左侧选中 **App** 工程 → **App** target → **Signing & Capabilities**
@@ -50,7 +50,7 @@
 ### 命令行打包（可选）
 
 ```bash
-cd inner-shelter-ios/ios/App
+cd inner-space/ios/App
 xcodebuild -scheme App \
   -configuration Release \
   -destination 'generic/platform=iOS' \
@@ -76,7 +76,7 @@ xcodebuild -exportArchive \
 
 若 `com.innershelter.app` 不可用：
 
-1. 编辑 `inner-shelter-ios/capacitor.config.ts` → `appId`
+1. 编辑 `capacitor.config.ts` → `appId`
 2. 运行 `npx cap sync ios`
 3. 在 Xcode 中更新 Signing 的 Bundle Identifier
 4. 在 Apple Developer 注册新 Bundle ID

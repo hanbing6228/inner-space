@@ -76,10 +76,10 @@
 部署 GitHub Pages 后使用：
 
 ```
-https://hanbing6228.github.io/DS_Profolio/inner-shelter/privacy.html
+https://inner-shelter-ios.vercel.app/privacy.html
 ```
 
-（若仓库名不同，替换 `DS_Profolio` 为你的仓库名）
+（部署在 Vercel，与 PWA 同域）
 
 ## App 隐私问卷（Privacy Nutrition Labels）
 

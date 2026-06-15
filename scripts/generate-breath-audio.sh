@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Generate yoga-style breath guide MP3s (zh-CN male, slow & low).
-# Requires: inner-shelter-ios/.venv-tts (run once: python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts)
+# Requires: .venv-tts (run once: python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="$ROOT/../public/inner-shelter/audio/breath"
+OUT="$ROOT/web/audio/breath"
 EDGE="$ROOT/.venv-tts/bin/edge-tts"
 VOICE="zh-CN-YunjianNeural"
 RATE="-32%"
