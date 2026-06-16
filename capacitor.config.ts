@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'www',
   ios: {
     contentInset: 'automatic',
-    backgroundColor: '#0d0f14',
+    backgroundColor: '#d7e7fc',
     scheme: 'Inner Shelter',
   },
   plugins: {
@@ -16,12 +16,12 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchAutoHide: true,
       launchShowDuration: 2000,
-      backgroundColor: '#0d0f14',
+      backgroundColor: '#a6cdf4',
       showSpinner: false,
     },
     StatusBar: {
-      style: 'DARK',
-      backgroundColor: '#0d0f14',
+      style: 'LIGHT',
+      backgroundColor: '#d7e7fc',
     },
   },
 };
