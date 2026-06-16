@@ -128,7 +128,7 @@ function setEn(lv, btn) {
   toast(m[lv]);
   if (lv === 'lo') setW('dusk', document.getElementById('wdu'));
   else if (lv === 'hi') setW('neon', document.getElementById('wn'));
-  else setW('def', document.getElementById('wd'));
+  else setW('def', null);
 }
 
 // ── FLASHBACK ──
@@ -718,13 +718,18 @@ async function showLetter() {
 function setW(theme, btn) {
   document.querySelectorAll('.wb').forEach(b => b.classList.remove('on'));
   btn && btn.classList.add('on');
-  const wasNight = document.body.classList.contains('night');
-  document.body.className = '';
-  if (wasNight) document.body.classList.add('night');
-  if (theme === 'neon') document.body.classList.add('wn');
+  document.body.classList.remove('w-night-sky', 'w-neon', 'wf', 'wd', 'wr');
+  if (theme === 'neon') document.body.classList.add('w-neon');
   else if (theme === 'forest') document.body.classList.add('wf');
   else if (theme === 'dusk') document.body.classList.add('wd');
-  const nm = { def: '🌙 深夜模式', neon: '💠 霓虹模式', forest: '🌿 森林模式', dusk: '🌅 黄昏模式' };
+  else if (theme === 'rainbow') document.body.classList.add('wr');
+  const nm = {
+    def: '☀️ 晴空模式',
+    neon: '💠 霓虹模式',
+    forest: '🌿 森林模式',
+    dusk: '🌅 黄昏模式',
+    rainbow: '🌈 彩虹模式',
+  };
   toast('界面切换为 ' + (nm[theme] || theme));
 }
 
@@ -978,10 +983,10 @@ function applyTheme(t) {
   var sb2 = (isNativeApp() && window.Capacitor && window.Capacitor.Plugins) ? window.Capacitor.Plugins.StatusBar : null;
   if (sb2) {
     sb2.setStyle({ style: night ? 'DARK' : 'LIGHT' }).catch(function () { });
-    sb2.setBackgroundColor({ color: night ? '#0e1726' : '#e9f1fb' }).catch(function () { });
+    sb2.setBackgroundColor({ color: night ? '#0e1726' : '#a6cdf4' }).catch(function () { });
   }
   var mt = document.querySelector('meta[name="theme-color"]');
-  if (mt) mt.setAttribute('content', night ? '#0e1726' : '#e9f1fb');
+  if (mt) mt.setAttribute('content', night ? '#0e1726' : '#a6cdf4');
   try { localStorage.setItem('is_theme', t); } catch (e) { }
 }
 function toggleTheme() {

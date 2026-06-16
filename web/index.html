@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#e9f1fb">
+<meta name="theme-color" content="#a6cdf4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="内在家园">
@@ -16,7 +16,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"></noscript>
 </head>
 <body>
-<script>(function(){try{var t=localStorage.getItem('is_theme');if(!t||t==='null')t='day';if(t==='night')document.body.classList.add('night');var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='night'?'#0e1726':'#e9f1fb');}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('is_theme');if(!t||t==='null')t='day';if(t==='night')document.body.classList.add('night');var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='night'?'#0e1726':'#a6cdf4');}catch(e){}})();</script>
 
 <!-- ONBOARDING -->
 <div class="onboard" id="onboard">
@@ -317,10 +317,10 @@
   <div class="slbl">界面天气系统</div>
   <div style="padding:8px 24px;font-size:12px;color:var(--muted);line-height:1.7">根据你的能量状态自动切换视觉质感。也可以手动选择今晚的氛围。</div>
   <div class="wrow">
-    <div class="wb on" id="wd" onclick="setW('def',this)"><div class="wi">🌙</div><div class="wl">深夜</div></div>
     <div class="wb" id="wn" onclick="setW('neon',this)"><div class="wi">💠</div><div class="wl">霓虹</div></div>
     <div class="wb" id="wf" onclick="setW('forest',this)"><div class="wi">🌿</div><div class="wl">森林</div></div>
     <div class="wb" id="wdu" onclick="setW('dusk',this)"><div class="wi">🌅</div><div class="wl">黄昏</div></div>
+    <div class="wb" id="wr" onclick="setW('rainbow',this)"><div class="wi">🌈</div><div class="wl">彩虹</div></div>
   </div>
   <div style="height:8px"></div>
   <div class="slbl">外观</div>

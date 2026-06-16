@@ -1,17 +1,80 @@
 :root {
-  --bg:#e9f1fb;--surf:#ffffff;--surf2:#f1f6fd;--surf3:#e6eff9;
-  --bdr:rgba(40,70,120,.10);--txt:#22344f;
-  --muted:rgba(34,52,79,.52);--soft:rgba(34,52,79,.80);
-  --W:#3b7fdf;--C:#4d9cc4;--G:#4f9c74;--P:#7b78cc;--R:#cc6b6b;--O:#b8924a;
+  --bg:#d7e7fc;--surf:#ffffff;--surf2:#eef4fe;--surf3:#e1ecfc;
+  --bdr:rgba(40,80,150,.12);--txt:#1f3050;
+  --muted:rgba(31,48,80,.52);--soft:rgba(31,48,80,.80);
+  --W:#588ce3;--C:#5d9ae6;--G:#4f9c74;--P:#7b78cc;--R:#cc6b6b;--O:#b8924a;
   --r:20px;--rs:12px;--safe:env(safe-area-inset-bottom,20px);
-  --o1:rgba(91,159,214,.12);--o2:rgba(59,127,223,.09);
+  --o1:rgba(88,140,227,.14);--o2:rgba(150,199,243,.13);
 }
-body.wn{--bg:#e4ecf7;--surf:#ffffff;--o1:rgba(91,159,214,.13);--o2:rgba(59,127,223,.10);--C:#4a90c8}
-body.wf{--bg:#e9f3ee;--surf:#ffffff;--o1:rgba(79,156,116,.13);--o2:rgba(91,180,150,.10);--C:#4d9cc4;--G:#3f8f66}
-body.wd{--bg:#efeef9;--surf:#ffffff;--o1:rgba(123,120,204,.13);--o2:rgba(150,140,210,.10);--C:#6f7fd0;--P:#6f6cc4}
+/* 深夜 · starry midnight — deep indigo, star-flecked */
+body.w-night-sky{
+  --bg:#0a1024;--surf:#141d3c;--surf2:#1a244a;--surf3:#212d58;
+  --bdr:rgba(155,180,255,.16);--txt:#edf0ff;
+  --muted:rgba(200,210,255,.5);--soft:rgba(205,215,255,.84);
+  --W:#9db4ff;--C:#82a0ff;--G:#79d3b1;--P:#b8a8f6;--R:#f0a2a2;--O:#e8c87a;
+  --o1:rgba(96,124,245,.20);--o2:rgba(150,175,255,.14);
+  --cardsh:0 6px 24px -12px rgba(0,0,0,.62);
+}
+/* 霓虹 · fluorescent neon — near-black, electric cyan + magenta */
+body.w-neon{
+  --bg:#070410;--surf:#150b26;--surf2:#1c1033;--surf3:#241644;
+  --bdr:rgba(255,95,232,.22);--txt:#f7edff;
+  --muted:rgba(222,185,248,.55);--soft:rgba(238,214,255,.86);
+  --W:#33f0ff;--C:#33f0ff;--G:#5dff9e;--P:#c46bff;--R:#ff6bbf;--O:#ffd84a;
+  --o1:rgba(51,240,255,.22);--o2:rgba(255,79,216,.20);
+  --cardsh:0 6px 30px -12px rgba(150,0,220,.5);
+}
+/* 森林 · deep verdant forest — richer, deeper green */
+body.wf{
+  --bg:#d2e6d6;--surf:#f4faf4;--surf2:#e7f2e9;--surf3:#d7ecdb;
+  --bdr:rgba(28,82,52,.18);--txt:#15301f;
+  --muted:rgba(34,72,48,.58);--soft:rgba(24,58,38,.84);
+  --W:#2c8c5d;--C:#2a9b86;--G:#1f7a45;--P:#5a9c70;--R:#c2613f;--O:#8f8f33;
+  --o1:rgba(42,140,88,.20);--o2:rgba(92,182,122,.15);
+}
+/* 黄昏 · golden dusk — warm amber & orange */
+body.wd{
+  --bg:#fbe7d6;--surf:#fffaf2;--surf2:#fdf0e0;--surf3:#f8e2cd;
+  --bdr:rgba(176,98,46,.18);--txt:#3c2414;
+  --muted:rgba(96,58,36,.58);--soft:rgba(74,44,26,.84);
+  --W:#e3782f;--C:#dd9a2f;--G:#c08a3a;--P:#cf6a4d;--R:#cc5750;--O:#eaa62c;
+  --o1:rgba(246,150,66,.22);--o2:rgba(240,108,84,.17);
+}
+body.wr{--bg:#f1edfb;--surf:#ffffff;--surf2:#f6f1fd;--surf3:#ece5f8;--W:#8b6fd8;--C:#3e9fcf;--G:#4fae7d;--P:#b066c0;--o1:rgba(236,124,180,.16);--o2:rgba(96,165,250,.14)}
+body.wr .o1{background:radial-gradient(circle,rgba(236,124,180,.18) 0%,transparent 64%)}
+body.wr .o2{background:radial-gradient(circle,rgba(96,165,250,.16) 0%,transparent 64%)}
+body.wr .o3{width:56vw;height:56vw;background:radial-gradient(circle,rgba(95,176,125,.14) 0%,transparent 64%)}
+body.wr .amb::after{content:'';position:absolute;inset:0;background:radial-gradient(42vw 42vw at 22% 18%,rgba(236,124,180,.11),transparent 60%),radial-gradient(42vw 42vw at 80% 28%,rgba(96,165,250,.10),transparent 60%),radial-gradient(48vw 48vw at 52% 88%,rgba(95,176,125,.09),transparent 60%);animation:auroraDrift 30s ease-in-out infinite;will-change:transform}
+@keyframes auroraDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-3vw)}}
+
+/* ── per-theme third orb glow ── */
+body.w-night-sky .o3{width:50vw;height:50vw;background:radial-gradient(circle,rgba(120,150,255,.12) 0%,transparent 64%)}
+body.w-neon .o1{background:radial-gradient(circle,rgba(51,240,255,.22) 0%,transparent 62%)}
+body.w-neon .o2{background:radial-gradient(circle,rgba(255,79,216,.20) 0%,transparent 62%)}
+body.w-neon .o3{width:52vw;height:52vw;background:radial-gradient(circle,rgba(93,255,158,.14) 0%,transparent 62%)}
+body.wd .o3{width:52vw;height:52vw;background:radial-gradient(circle,rgba(240,150,80,.16) 0%,transparent 64%)}
+body.wf .o3{width:50vw;height:50vw;background:radial-gradient(circle,rgba(50,150,95,.14) 0%,transparent 64%)}
+
+/* ── 深夜 starfield ── */
+body.w-night-sky .amb::after{content:'';position:absolute;inset:0;pointer-events:none;background-repeat:no-repeat;background-image:radial-gradient(1.6px 1.6px at 8% 14%,#fff,transparent),radial-gradient(1.4px 1.4px at 17% 33%,rgba(255,255,255,.85),transparent),radial-gradient(1.2px 1.2px at 26% 12%,rgba(255,255,255,.7),transparent),radial-gradient(2px 2px at 33% 50%,#fff,transparent),radial-gradient(1.3px 1.3px at 44% 22%,rgba(255,255,255,.8),transparent),radial-gradient(1.5px 1.5px at 55% 38%,#fff,transparent),radial-gradient(1.2px 1.2px at 63% 16%,rgba(255,255,255,.7),transparent),radial-gradient(1.8px 1.8px at 72% 47%,#fff,transparent),radial-gradient(1.3px 1.3px at 81% 25%,rgba(255,255,255,.82),transparent),radial-gradient(1.5px 1.5px at 90% 40%,#fff,transparent),radial-gradient(1.2px 1.2px at 14% 60%,rgba(255,255,255,.7),transparent),radial-gradient(1.6px 1.6px at 38% 72%,#fff,transparent),radial-gradient(1.3px 1.3px at 60% 66%,rgba(255,255,255,.78),transparent),radial-gradient(1.4px 1.4px at 78% 70%,#fff,transparent),radial-gradient(1.2px 1.2px at 88% 60%,rgba(255,255,255,.7),transparent),radial-gradient(1.5px 1.5px at 50% 85%,#fff,transparent);animation:twinkle 5.5s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.5}50%{opacity:.95}}
+
+/* ── dark-weather component readability (深夜 / 霓虹) ── */
+body.w-night-sky .tabs{background:color-mix(in srgb,var(--bg) 86%,transparent);box-shadow:0 -2px 24px -10px rgba(0,0,0,.55)}
+body.w-neon .tabs{background:color-mix(in srgb,var(--bg) 90%,transparent);box-shadow:0 -2px 26px -10px rgba(120,0,200,.4)}
+body.w-night-sky .toast,body.w-neon .toast{background:var(--surf2);color:var(--soft);border-color:var(--bdr);box-shadow:0 12px 36px -10px rgba(0,0,0,.6)}
+body.w-night-sky .fbo,body.w-neon .fbo{background:color-mix(in srgb,var(--bg) 95%,#000)}
+body.w-night-sky .tgl::after,body.w-neon .tgl::after{background:var(--bg)}
+body.w-night-sky .tico,body.w-neon .tico{color:color-mix(in srgb,var(--soft) 42%,transparent)}
+body.w-night-sky .tlbl,body.w-neon .tlbl{color:color-mix(in srgb,var(--soft) 32%,transparent)}
+body.w-night-sky .ti.on .tico,body.w-neon .ti.on .tico{color:var(--W)}
+body.w-night-sky .ti.on,body.w-neon .ti.on{background:color-mix(in srgb,var(--W) 14%,transparent)}
+body.w-night-sky :is(.aci,.aico,.stile .si,.shico,.wb .wi,.sico,.ritual-step-ico,.mc .mi) .ic,body.w-neon :is(.aci,.aico,.stile .si,.shico,.wb .wi,.sico,.ritual-step-ico,.mc .mi) .ic{color:var(--W)}
+body.w-night-sky .tii,body.w-neon .tii{color:var(--C)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans','Noto Serif SC',-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB',sans-serif;background:var(--bg);color:var(--txt);transition:background 2.5s}
+body:not(.night):not(.w-neon):not(.wf):not(.wd):not(.wr){background:linear-gradient(168deg,#96c7f3 0%,#cddefc 50%,#eef5fe 100%)}
 .amb{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .o{position:absolute;border-radius:50%}
 .o1{width:65vw;height:65vw;background:radial-gradient(circle,var(--o1) 0%,transparent 65%);top:-15vw;right:-15vw;animation:oA 18s ease-in-out infinite}
@@ -266,7 +329,7 @@ body{font-family:'DM Sans','Noto Serif SC',-apple-system,BlinkMacSystemFont,'Pin
 .shc{font-size:13px;color:var(--W);font-weight:500;white-space:nowrap;text-align:right}
 .shcl{font-size:10px;color:var(--muted);display:block}
 /* SETTINGS */
-.wrow{margin:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.wrow{margin:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .wb{aspect-ratio:1;border-radius:14px;border:1px solid var(--bdr);background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .25s}
 .wb.on{border-color:rgba(59,127,223,.4);background:rgba(59,127,223,.08)}
 .wb:active{transform:scale(.93)}
@@ -349,7 +412,8 @@ body{font-family:'DM Sans','Noto Serif SC',-apple-system,BlinkMacSystemFont,'Pin
 /* ── ONBOARDING ── */
 .onboard{position:fixed;inset:0;z-index:400;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;transition:opacity .8s ease}
 .onboard.hidden{opacity:0;pointer-events:none}
-.onboard-logo{font-size:56px;margin-bottom:20px;animation:bex 4s ease-in-out infinite}
+.onboard-logo{font-size:56px;margin-bottom:24px;animation:bex 4s ease-in-out infinite}
+.onboard-logo img{width:98px;height:98px;border-radius:24px;display:block;margin:0 auto;box-shadow:0 20px 44px -16px rgba(40,70,120,.5)}
 .onboard-title{font-family:'DM Serif Display',serif;font-size:32px;color:var(--txt);line-height:1.2;margin-bottom:12px}
 .onboard-sub{font-family:'Noto Serif SC',serif;font-size:14px;color:var(--muted);line-height:2;margin-bottom:36px}
 .onboard-btn{padding:16px 40px;border-radius:30px;background:rgba(59,127,223,.1);border:1px solid rgba(59,127,223,.3);color:var(--W);font-size:16px;cursor:pointer;transition:all .3s;font-family:'DM Serif Display',serif;font-style:italic}
@@ -485,3 +549,59 @@ body.on-healer .tabs{transform:translateX(-50%) translateY(160%)}
 .hzbar textarea:focus{border-color:rgba(59,127,223,.45)}
 .hzsend{width:42px;height:42px;flex-shrink:0;border-radius:50%;border:none;background:linear-gradient(135deg,#588ce3,#3b7fdf);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 6px 16px -6px rgba(59,127,223,.6)}
 .hzsend:active{transform:scale(.88)}
+
+/* ════ UNIFIED BLUE ICON SYSTEM ════ */
+.ic{display:inline-block;flex-shrink:0;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+/* tab bar */
+.tico{width:auto;height:auto;font-size:0;color:rgba(34,52,79,.4);transition:transform .2s,color .2s}
+.tico .ic{width:23px;height:23px}
+.ti.on .tico{color:var(--W);transform:scale(1.08)}
+body.night .tico{color:rgba(206,224,252,.4)}
+body.night .ti.on .tico{color:#8fc0ff}
+/* module grid */
+.mc .mi{width:27px;height:27px;color:var(--W);margin-bottom:11px;display:block}
+body.night .mc .mi{color:#8fc0ff}
+/* unify accent bars to one blue family */
+.mc.cl::after,.mc.gn::after,.mc.pp::after,.mc.wm::after,.mc.rd::after,.mc.gd::after{background:linear-gradient(90deg,var(--W),transparent)}
+/* energy selector */
+.enb .ei{width:22px;height:22px;color:inherit;margin:0 auto 6px;display:block}
+/* SOS — rose safety color, same line style */
+.sosring{font-size:0}
+.sosring .ic{width:27px;height:27px;color:#cc6b6b}
+body.night .sosring .ic{color:#f0a8a8}
+/* TIPP rows */
+.tii{display:flex;align-items:center;justify-content:center;color:var(--C)}
+.tii .ic{width:22px;height:22px}
+body.night .tii{color:#7fc4dd}
+/* hero tag · points · section labels */
+.htag .ic{width:14px;height:14px;color:var(--W)}
+.ptpill .ic{width:13px;height:13px;color:var(--W)}
+.slbl .ic{width:14px;height:14px;color:var(--W);margin-right:6px}
+.lclaim .ic,.ltag .ic{color:var(--P)}
+/* theme toggle · CSS-driven sun/moon swap */
+.themetgl:has(.ic){font-size:0}
+.themetgl .ic{width:17px;height:17px;color:var(--W)}
+.themetgl .ic-sun{display:none}
+body.night .themetgl .ic-moon{display:none}
+body.night .themetgl .ic-sun{display:inline-block}
+body.night .themetgl .ic{color:#8fc0ff}
+
+/* ════ SUB-PAGE ICONS · sizing + blue system ════ */
+/* block feature icons → unified blue, sized to their containers */
+.aci,.aico,.stile .si,.shico,.wb .wi,.sico,.ritual-step-ico,.ritual-icon,.bgl-walk-ico{font-size:0;line-height:0}
+.sico,.ritual-step-ico{display:inline-flex;align-items:center;justify-content:center}
+.aci .ic{width:42px;height:42px;color:var(--W)}
+.aico .ic{width:23px;height:23px;color:var(--W)}
+.stile .si .ic{width:22px;height:22px;color:var(--W)}
+.shico .ic{width:24px;height:24px;color:var(--W)}
+.wb .wi .ic{width:23px;height:23px;color:var(--W)}
+.sico .ic{width:19px;height:19px;color:var(--W)}
+.ritual-step-ico .ic{width:22px;height:22px;color:var(--W)}
+.ritual-icon .ic{width:46px;height:46px;color:var(--P)}
+.bgl-walk-ico .ic{width:28px;height:28px;color:var(--G)}
+body.night :is(.aci,.aico,.stile .si,.shico,.wb .wi,.sico,.ritual-step-ico) .ic{color:#8fc0ff}
+/* inline label icons → inherit their context color (AI purple, emotion hues, etc.) */
+.pbtn .ic,.cta .ic,.evbtn .ic,.bub .ic,.bgl-ctx .ic,.bgl-target .ic,.bgl-insight-lbl .ic,.hzchip .ic,.ltag .ic,.aib-l .ic,.bgl-log-btn .ic,.antfl .ic,.pcl .ic{width:15px;height:15px;margin-right:2px}
+.aib-l .ic,.ltag .ic{color:var(--P)}
+.antfl .ic{color:var(--R)}
+.pcl .ic{width:16px;height:16px}
